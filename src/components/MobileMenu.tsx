@@ -28,7 +28,7 @@ const MobileMenu = () => {
       </div>
 
       {isOpen && (
-        <div className="absolute w-full top-24 left-0 z-10 h-[calc(100vh-96px)] bg-white flex flex-col items-center justify-center gap-8 text-xl font-medium">
+        <div className="absolute w-full top-24 left-0 z-20 h-[calc(100vh-96px)] bg-white flex flex-col items-center justify-center gap-8 text-xl font-medium">
           <Link href={"/"}>HomePage</Link>
           <Link href={"/"}>Friends</Link>
           <Link href={"/"}>Groups</Link>

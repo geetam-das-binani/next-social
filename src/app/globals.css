@@ -8,3 +8,10 @@
 .scrollbar-hide{
    scrollbar-width: none;
 }
+[data-theme="dark"]{
+color: red;
+}
+
+[data-theme="light"]{
+    color: red
+}

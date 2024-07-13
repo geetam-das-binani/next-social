@@ -1,8 +1,7 @@
 import Link from "next/link";
 import MobileMenu from "./MobileMenu";
 import Image from "next/image";
-import { ClerkLoaded, ClerkLoading } from "@clerk/nextjs";
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { SignedIn, SignedOut, UserButton,ClerkLoaded, ClerkLoading } from "@clerk/nextjs";
 
 const Navbar = () => {
   return (
