@@ -8,9 +8,12 @@ const Comments = async ({ postId }: { postId: number }) => {
     },
     include: {
       user: true,
+      likes:true
     },
   });
 
+  
+  
   return (
     <div className="">
       {/*write comments interaction */}

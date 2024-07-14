@@ -1,9 +1,11 @@
 "use client";
-import { addComment } from "@/lib/actions";
+import { addComment, deleteCommentOfUser } from "@/lib/actions";
 import { CommentType } from "@/types/types";
 import { useUser } from "@clerk/nextjs";
 import Image from "next/image";
 import { Fragment, useOptimistic, useState } from "react";
+import CommentLike from "./CommentLike";
+import { useRouter } from "next/navigation";
 
 const CommentsLists = ({
   comments,
@@ -12,7 +14,9 @@ const CommentsLists = ({
   comments: CommentType[];
   postId: number;
 }) => {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
+  const router = useRouter();
+  const [open, setIsOpen] = useState(false);
   const [commentState, setCommentState] = useState(comments);
   const [desc, setDesc] = useState("");
   const [optimisticComments, setOptimisicComments] = useOptimistic(
@@ -29,6 +33,7 @@ const CommentsLists = ({
       updatedAt: new Date(),
       userId: user.id,
       postId,
+      likes: [],
       user: {
         name: user.firstName,
         surname: user.lastName,
@@ -44,7 +49,22 @@ const CommentsLists = ({
       console.log(error);
     }
   };
+  const deleteComment = async (commentId: number) => {
+    setCommentState(commentState.filter((comment) => comment.id !== commentId));
+    try {
+      await deleteCommentOfUser(postId);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsOpen(false);
+    }
+  };
 
+  if (!isLoaded) {
+    return (
+      <div className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-gray-500 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white" />
+    );
+  }
 
   return (
     <Fragment>
@@ -102,28 +122,42 @@ const CommentsLists = ({
 
               <div className="flex items-center gap-8 text-xs text-gray-500">
                 <div className="flex items-center gap-4">
-                  <Image
-                    alt=""
-                    src={"/like.png"}
-                    className="w-8 h-8 rounded-full"
-                    width={12}
-                    height={12}
-                  />
-                  <span className="text-gray-300">|</span>
-                  <span className="text-gray-500">0 Likes</span>
+                  {user?.id && (
+                    <CommentLike
+                      userId={user?.id}
+                      isMyLikeOnComment={comment.likes.map(
+                        (like) => like.userId
+                      )}
+                      commentId={comment.id}
+                      likesCount={comment.likes.length}
+                    />
+                  )}
                 </div>
                 <div className="">Reply</div>
               </div>
             </div>
 
             {/* icon  */}
-            <Image
-              src={"/more.png"}
-              width={16}
-              height={16}
-              alt={""}
-              className="w-4 h-4 cursor-pointer"
-            ></Image>
+            <form className="relative">
+              <Image
+                src={"/more.png"}
+                width={16}
+                height={16}
+                alt={""}
+                className="w-4 h-4 cursor-pointer"
+                onClick={() => setIsOpen(!open)}
+              ></Image>
+              {open && (
+                <div className="w-40 p-3  absolute top-4 right-0 bg-white rounded-md text-sm shadow-md z-50 hover:bg-gray-100 hover:cursor-pointer">
+                  <li
+                    onClick={() => deleteComment(comment.id)}
+                    className="list-none text-red-500"
+                  >
+                    Delete{" "}
+                  </li>
+                </div>
+              )}
+            </form>
           </div>
         ))}
       </div>

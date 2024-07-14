@@ -10,6 +10,7 @@ const Posts = ({ post }: { post: PostType }) => {
   const { userId } = auth();
   if (!userId) return null
   const isMyPost = post.userId === userId;
+  
   return (
     <div className="flex flex-col gap-4">
       {/* user */}

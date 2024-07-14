@@ -5,7 +5,6 @@ import * as z from "zod";
 import prisma from "./client";
 import { revalidatePath } from "next/cache";
 
-
 export const switchFollow = async (userId: string) => {
   const { userId: receiverId } = auth();
   if (!receiverId) throw new Error("User not logged in");
@@ -244,6 +243,7 @@ export const addComment = async (postId: number, comment: string) => {
       },
       include: {
         user: true,
+        likes: true,
       },
     });
     revalidatePath("/");
@@ -286,32 +286,33 @@ export const addPost = async (
 export const addStory = async (image: string) => {
   const { userId } = auth();
   if (!userId) throw new Error("User not logged in");
- 
+
   try {
     const Image = z.string();
     const validateImage = Image.safeParse(image);
-    const existingStory=await prisma.stories.findFirst({where:{userId:userId}})
-    if(existingStory) {
-      await prisma.stories.delete({where:{id:existingStory.id}})
+    const existingStory = await prisma.stories.findFirst({
+      where: { userId: userId },
+    });
+    if (existingStory) {
+      await prisma.stories.delete({ where: { id: existingStory.id } });
     }
-   const newStory= await prisma.stories.create({
+    const newStory = await prisma.stories.create({
       data: {
         userId,
         img: validateImage.data!,
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
       },
-      include:{
-       user:{
-        select:
-        {
-          avatar:true,
-          name:true,
-          username:true,
-        }
-       }
-      }
+      include: {
+        user: {
+          select: {
+            avatar: true,
+            name: true,
+            username: true,
+          },
+        },
+      },
     });
-    
+
     return newStory;
   } catch (error) {
     throw new Error("Something went wrong");
@@ -336,6 +337,61 @@ export const deletePost = async (postId: number) => {
     revalidatePath("/");
     return "true";
   } catch (error) {
+    throw new Error("Something went wrong");
+  }
+};
+
+export const toggleLikeOnComment = async (commentId: number) => {
+  const { userId } = auth();
+  if (!userId) throw new Error("User not logged in");
+  try {
+    const existingLike = await prisma.like.findFirst({
+      where: {
+        commentId,
+        userId,
+      },
+    });
+    if (existingLike) {
+      await prisma.like.delete({
+        where: {
+          id: existingLike.id,
+        },
+      });
+    } else {
+      await prisma.like.create({
+        data: {
+          commentId,
+          userId,
+        },
+      });
+    }
+    revalidatePath("/");
+  } catch (error) {
+    console.log(error);
+    throw new Error("Something went wrong");
+  }
+};
+
+export const deleteCommentOfUser = async (postId: number) => {
+  const { userId } = auth();
+  if (!userId) throw new Error("User not logged in");
+  try {
+    const existingComment = await prisma.comment.findFirst({
+      where: {
+        postId,
+        userId,
+      },
+    });
+    if (existingComment) {
+      await prisma.comment.delete({
+        where: {
+          id: existingComment.id,
+        },
+      });
+    }
+   
+  } catch (error) {
+    console.log(error);
     throw new Error("Something went wrong");
   }
 };

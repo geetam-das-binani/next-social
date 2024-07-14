@@ -2,7 +2,7 @@ import prisma from "@/lib/client";
 import { auth } from "@clerk/nextjs/server";
 
 import React from "react";
-import StoryList from "./feed/StoryList";
+import StoryList from "./StoryList";
 
 const Stories = async () => {
   const { userId: currentUserId } = auth();
