@@ -13,20 +13,19 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{children: React.ReactNode}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <ClerkProvider>
-       <html lang="en">
-      <body className={inter.className}>
-        <div className="w-full px-4 bg-white md:px-8 lg:px-16 xl:px-32 2xl:px-64">
-          <Navbar />
-        </div>
-      <div className="bg-slate-100 px-4 md:px-8 lg:px-16 xl:px-32 2xl:px-64">
-      {children}
-      </div>
-      </body>
-    </html>
+      <html lang="en">
+        <body className={inter.className}>
+          <div className="w-full px-4 bg-white md:px-8 lg:px-16 xl:px-32 2xl:px-64">
+            <Navbar />
+          </div>
+          <div className="bg-slate-100 px-4 md:px-8 lg:px-16 xl:px-32 2xl:px-64">
+            {children}
+          </div>
+        </body>
+      </html>
     </ClerkProvider>
-   
   );
 }

@@ -2,7 +2,7 @@
 import { updateProfile } from "@/lib/actions";
 import { User } from "@prisma/client";
 import Image from "next/image";
-import { useActionState, useState } from "react";
+import {useState } from "react";
 import { CldUploadWidget } from "next-cloudinary";
 import { useFormState } from "react-dom";
 import UpdateButton from "./rightmenu/UpdateButton";
@@ -31,7 +31,9 @@ const UpdateUser = ({ user }: { user: User }) => {
         Update
       </button>
       {isOpen && (
-        <div className=" absolute left-0 top-0 z-50 flex items-center justify-center w-screen h-screen bg-black bg-opacity-65">
+        <div className=" absolute left-0 
+        top-0 z-50 flex items-center justify-center
+         w-screen h-screen bg-black bg-opacity-65">
           <form
             action={(formData) => {
               formData.append("cover", cover?.secure_url || "");
@@ -43,12 +45,15 @@ const UpdateUser = ({ user }: { user: User }) => {
                 console.log(error.message);
               }
             }}
-            className="relative p-12 bg-white rounded-lg shadow-md flex flex-col gap-2 w-full  md:w-1/2  xl:w-1/3"
+            className="relative p-12
+             bg-white rounded-lg shadow-md flex flex-col
+              gap-2 w-full  md:w-1/2  xl:w-1/3"
           >
             {/* title  */}
             <h1>Update Profile</h1>
             <div className="text-xs text-gray-500 mt-4">
-              Use the navbar profile to change the avatar or the username
+              Use the navbar profile to change the avatar or the 
+              username
             </div>
             {/* cover picture upload  */}
 

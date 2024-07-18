@@ -5,7 +5,8 @@ import { useUser } from "@clerk/nextjs";
 import Image from "next/image";
 import { Fragment, useOptimistic, useState } from "react";
 import CommentLike from "./CommentLike";
-import { useRouter } from "next/navigation";
+import ReplyOnComment from "./ReplyIOnComment";
+
 
 const CommentsLists = ({
   comments,
@@ -15,13 +16,17 @@ const CommentsLists = ({
   postId: number;
 }) => {
   const { user, isLoaded } = useUser();
-  const router = useRouter();
+
   const [open, setIsOpen] = useState(false);
   const [commentState, setCommentState] = useState(comments);
   const [desc, setDesc] = useState("");
   const [optimisticComments, setOptimisicComments] = useOptimistic(
     commentState,
-    (state, value: CommentType) => [value, ...state]
+    (state, value: CommentType | number) => {
+      return typeof value === "number"
+        ? state.filter((comment) => comment.id !== value)
+        : [value, ...state];
+    }
   );
 
   const commentAction = async () => {
@@ -34,6 +39,7 @@ const CommentsLists = ({
       userId: user.id,
       postId,
       likes: [],
+      replies:[],
       user: {
         name: user.firstName,
         surname: user.lastName,
@@ -43,16 +49,19 @@ const CommentsLists = ({
     });
     try {
       const newComment = await addComment(postId, desc);
-      setCommentState((prev) => [newComment, ...prev]);
       setDesc("");
+      setCommentState((prev) => [newComment, ...prev]);
     } catch (error) {
       console.log(error);
     }
   };
   const deleteComment = async (commentId: number) => {
-    setCommentState(commentState.filter((comment) => comment.id !== commentId));
+    setOptimisicComments(commentId);
     try {
       await deleteCommentOfUser(postId);
+      setCommentState((prev) => [
+        ...prev.filter((comment) => comment.id !== commentId),
+      ]);
     } catch (error) {
       console.log(error);
     } finally {
@@ -121,7 +130,7 @@ const CommentsLists = ({
               <p>{comment.desc}</p>
 
               <div className="flex items-center gap-8 text-xs text-gray-500">
-                <div className="flex items-center gap-4">
+                <div>
                   {user?.id && (
                     <CommentLike
                       userId={user?.id}
@@ -130,11 +139,13 @@ const CommentsLists = ({
                       )}
                       commentId={comment.id}
                       likesCount={comment.likes.length}
+                      replies={comment.replies || []}
                     />
                   )}
                 </div>
-                <div className="">Reply</div>
+                
               </div>
+             
             </div>
 
             {/* icon  */}
@@ -147,14 +158,14 @@ const CommentsLists = ({
                 className="w-4 h-4 cursor-pointer"
                 onClick={() => setIsOpen(!open)}
               ></Image>
-              {open && (
+              {user?.id === comment.userId && open && (
                 <div className="w-40 p-3  absolute top-4 right-0 bg-white rounded-md text-sm shadow-md z-50 hover:bg-gray-100 hover:cursor-pointer">
-                  <li
+                  <button
                     onClick={() => deleteComment(comment.id)}
-                    className="list-none text-red-500"
+                    className=" text-red-500 w-full"
                   >
                     Delete{" "}
-                  </li>
+                  </button>
                 </div>
               )}
             </form>

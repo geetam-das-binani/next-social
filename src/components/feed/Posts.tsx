@@ -5,12 +5,12 @@ import PostInteraction from "./PostInteraction";
 import { Suspense } from "react";
 import PostInfo from "./PostInfo";
 import { auth } from "@clerk/nextjs/server";
-
+import { getTypeOfVideo } from "@/utils/getVideoType";
 const Posts = ({ post }: { post: PostType }) => {
   const { userId } = auth();
-  if (!userId) return null
+  if (!userId) return null;
   const isMyPost = post.userId === userId;
-  
+
   return (
     <div className="flex flex-col gap-4">
       {/* user */}
@@ -30,7 +30,7 @@ const Posts = ({ post }: { post: PostType }) => {
           </span>
         </div>
 
-        <PostInfo userId={userId} postId={post.id} isMyPost={isMyPost} />
+        <PostInfo post={post}  postId={post.id} isMyPost={isMyPost} />
       </div>
       {/* description and image */}
       <div className="flex flex-col gap-4">
@@ -42,9 +42,19 @@ const Posts = ({ post }: { post: PostType }) => {
               alt=""
               className="object-cover rounded-md"
             />
-
           </div>
         )}
+        {
+          post?.video && (
+            
+              <video controls  className="w-full h-96 object-cover rounded-md"
+              >
+              <source src={post.video} type={getTypeOfVideo(post.video)} />
+              Your browser does not support the video tag.
+            </video>
+            
+          )
+        }
         <p>{post.desc}</p>
       </div>
 

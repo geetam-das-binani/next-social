@@ -8,7 +8,8 @@ const Comments = async ({ postId }: { postId: number }) => {
     },
     include: {
       user: true,
-      likes:true
+      likes:true,
+      replies:true
     },
   });
 

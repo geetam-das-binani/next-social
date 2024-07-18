@@ -244,6 +244,7 @@ export const addComment = async (postId: number, comment: string) => {
       include: {
         user: true,
         likes: true,
+        replies: true,
       },
     });
     revalidatePath("/");
@@ -256,11 +257,11 @@ export const addComment = async (postId: number, comment: string) => {
 };
 export const addPost = async (
   prevState: string,
-  payload: { desc: string; image: string }
+  payload: { desc: string; image: string; video: string }
 ): Promise<string> => {
   const { userId } = auth();
   if (!userId) throw new Error("User not logged in");
-  const { desc, image } = payload;
+  const { desc, image, video } = payload;
 
   const Desc = z.string().min(3).max(255);
   const validateDescription = Desc.safeParse(desc);
@@ -274,6 +275,7 @@ export const addPost = async (
         desc: validateDescription.data,
         userId,
         img: image,
+        video,
       },
     });
     revalidatePath("/");
@@ -389,9 +391,54 @@ export const deleteCommentOfUser = async (postId: number) => {
         },
       });
     }
-   
   } catch (error) {
     console.log(error);
     throw new Error("Something went wrong");
+  }
+};
+
+export const rePost = async (
+  prevState: { desc: string; image: string; video: string },
+  payload: { desc: string; image: string; video: string }
+): Promise<{ desc: string; image: string; video: string }> => {
+  const { userId } = auth();
+  if (!userId) throw new Error("User not logged in");
+  const { desc, image, video } = payload;
+
+  try {
+    const response = await prisma.post.create({
+      data: {
+        desc,
+        userId,
+        img: image,
+        video,
+      },
+    });
+    revalidatePath("/");
+    return {
+      desc: response.desc,
+      image: response.img ?? "",
+      video: response.video ?? "",
+    };
+  } catch (error) {
+    throw new Error("Something went wrong");
+  }
+};
+
+export const addReplyOnComment = async (commentId: number, desc: string) => {
+  const { userId } = auth();
+  if (!userId) throw new Error("User not logged in");
+  try {
+    const newReplyOnComment = await prisma.reply.create({
+      data: {
+        commentId,
+       
+        desc,
+      },
+    });
+    return newReplyOnComment;
+  } catch (error: any) {
+    console.log(error);
+    throw new Error(error.message);
   }
 };
